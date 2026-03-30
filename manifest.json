@@ -1,0 +1,42 @@
+{
+  "manifest_version": 3,
+  "name": "FB Group Sharer - Mobile Version",
+  "version": "1.0",
+  "description": "Facebook group sharing automation built specifically for the mobile version (m.facebook.com).",
+  "permissions": [
+    "storage",
+    "tabs",
+    "alarms",
+    "debugger",
+    "notifications"
+  ],
+  "host_permissions": [
+    "*://*.facebook.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "action": {
+    "default_title": "Open Share Assistant",
+    "default_icon": {
+      "16": "icon.png",
+      "32": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.facebook.com/*"
+      ],
+      "js": ["captionManager.js", "autoClickGroup.js", "groupScraper.js", "groupSelector.js", "content.js", "networkWatcher.js"]
+    }
+  ]
+}

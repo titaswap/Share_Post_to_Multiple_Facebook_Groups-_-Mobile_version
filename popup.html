@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>ShareUnlimited</title>
+  <link rel="stylesheet" type="text/css" href="popup.css">
+  <style>
+    .hidden {
+      display: none;
+    }
+    .preset-card:hover {
+      box-shadow: 0 4px 12px rgba(30,178,255,0.15) !important;
+      border-color: rgba(30,178,255,0.6) !important;
+    }
+  </style>
+</head>
+
+<body class="hidden">
+  <div class="wrapper">
+    <div class="header">
+      <div class="logo-container">
+        <a href="https://mgsa.lovable.app/" target="_blank"><img src="images/rectlogo.png"
+            alt="Multiple Group Share Assistant Logo" class="logo"></a>
+        <a href="https://solaitions.com" target="_blank"><img src="images/bysolaitions2.png" alt="by Solaitions"
+            class="by-logo"></a>
+      </div>
+      <div class="header-icons">
+        <span id="addressBookIcon" title="Saved Post Templates" class="header-icon star-emoji">📝</span>
+        <span id="oneClickTemplatesIcon" title="1 Click Share Templates" class="header-icon star-emoji">⚡</span>
+        <span id="groupPresetsIcon" title="Group Presets Manager" class="header-icon star-emoji">📖</span>
+        <span id="favoriteStarIcon" title="Favorite Fillers" class="header-icon star-emoji"
+          style="display: none;">⭐</span>
+        <span id="activityLogIcon" title="View Activity Log" class="header-icon star-emoji">📜</span>
+        <img src="images/settings.png" id="settingsIcon" title="Settings" class="header-icon" />
+      </div>
+    </div>
+    <!-- Wrong Location Overlay -->
+    <div id="wrong-location-overlay" class="wrong-location-overlay hidden">
+      <div class="overlay-content">
+        <button id="tutorial-button" class="tutorial-button">
+          📺 WATCH TUTORIAL
+        </button>
+        <img src="images/instructions.jpg" alt="Instructions" class="instructions-image">
+      </div>
+    </div>
+
+
+    <div id="share-container" style="padding: 15px;">
+      <h2 class="section-title">Multiple Group Share Assistant</h2>
+      <p class="section-subtitle-text">Safe & Simple Group Sharing</p>
+
+
+      <!-- Message Section -->
+      <div class="message-composer">
+        <div class="step-header">
+          <span class="step-number">Step 1</span>
+          <div class="step-content">
+            <div class="field-header">
+              <label class="field-label">(Optional)</label>
+              <span class="info-icon" data-image-tooltip="images/texthere.jpg">ℹ️</span>
+              <!-- AI Features Removed -->
+            </div>
+          </div>
+        </div>
+
+        <textarea id="post-content" class="message-textarea"
+          placeholder="Type the message you want to post in each group (optional)..."></textarea>
+
+        <div id="variation-indicator" class="variation-indicator hidden">
+          <span class="indicator-icon">✅</span>
+          <span id="variation-count-text">3 variations ready</span>
+          <button id="edit-variations-btn" class="link-button">Edit</button>
+        </div>
+
+        <div class="signature-section">
+          <!-- Container for both buttons side by side -->
+          <div class="signature-and-preset-container">
+            <div class="signature-header">
+              <button id="signature-toggle-btn" class="signature-toggle-btn">
+                ✍️ Add Signature
+              </button>
+              <span class="info-icon"
+                title="Automatically appends a custom signature to the end of every post you share">ℹ️</span>
+            </div>
+
+            <!-- Save as Preset Button -->
+            <div class="save-preset-header">
+              <button id="save-post-preset-btn" class="save-post-preset-btn">
+                💾 Save as Preset
+              </button>
+              <span class="info-icon" title="Save this post text as a template for future use">ℹ️</span>
+            </div>
+          </div>
+          <div id="signature-container" class="signature-container hidden">
+            <div class="field-header">
+              <label class="field-label">Signature</label>
+              <span class="info-icon" title="Text automatically added to the end of every post">ℹ️</span>
+            </div>
+            <textarea id="signature-text" class="signature-textarea"
+              placeholder="E.g., 'Join my community at example.com'"></textarea>
+            <div class="signature-actions">
+              <label class="signature-checkbox-label">
+                <input type="checkbox" id="signature-enabled" class="signature-checkbox">
+                <span>Enable</span>
+              </label>
+              <button id="signature-save-btn" class="signature-save-btn">💾 Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Group Selection Section -->
+      <div class="groups-section">
+        <div class="step-header">
+          <span class="step-number">Step 2</span>
+          <div class="step-content">
+            <h3 class="section-subtitle">Choose groups to share to</h3>
+          </div>
+        </div>
+
+        <!-- Show All Groups Button - Prominent placement -->
+        <button id="show-all-groups-button" class="show-all-groups-primary"
+          title="Click to load all groups (bypasses lazy loading)">
+          📋 Load All
+        </button>
+
+        <div class="group-search-container">
+          <input type="text" id="group-search-input" class="group-search-input" placeholder="🔍 Search groups...">
+          <span id="search-clear-btn" class="search-clear-btn hidden">✕</span>
+        </div>
+
+        <div class="controls-row">
+          <button id="refresh-groups-button" class="icon-button" title="Load groups from Facebook"
+            style="display: none;">
+            🔄 Refresh
+          </button>
+        </div>
+
+        <div class="group-stats" style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="group-count" class="group-count-badge">0 groups found</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button id="toggle-chosen-groups" class="toggle-chosen-btn hidden">
+              Show Chosen
+            </button>
+            <button id="popup-save-preset-btn" class="hidden" style="background:rgba(255,107,107,0.15); border:1px solid rgba(255,107,107,0.3); color:#ff6b6b; padding:3px 8px; border-radius:20px; font-size:10px; font-weight:600; cursor:pointer; white-space:nowrap;" title="Save selected groups as a preset">
+              💾 Save Preset
+            </button>
+            <label class="select-all-label">
+              <input type="checkbox" id="select-all-groups" class="styled-checkbox">
+              <span>Select All</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="group-list" class="group-list">
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <p class="empty-text">No groups found</p>
+            <p class="empty-hint">Open Facebook, click "Share" on a post, then click Refresh above.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Share Settings and Button -->
+      <div class="share-settings-section">
+        <div class="step-header">
+          <span class="step-number">Step 3</span>
+          <div class="step-content">
+            <h3 class="section-subtitle">Configure and Share</h3>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <div class="control-group">
+            <label class="control-label">Delay (sec)</label>
+            <span class="info-icon"
+              title="Time between posts (minimum 5s, recommended 25s for account safety)">ℹ️</span>
+            <input type="number" id="share-delay" value="30" min="5" class="control-input">
+          </div>
+
+          <div class="control-group">
+            <label class="control-label">
+              <input type="checkbox" id="randomize-delay" class="styled-checkbox" checked>
+              Randomize
+            </label>
+            <span class="info-icon" title="Varies delay to appear more human">ℹ️</span>
+          </div>
+        </div>
+        
+        <div class="controls-row" style="margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 10px;">
+          <div class="control-group">
+            <label class="control-label">Repeat Runs</label>
+            <span class="info-icon" title="How many times to repeat the entire share sequence">ℹ️</span>
+            <input type="number" id="repeat-count" value="1" min="1" max="100" class="control-input" style="width: 50px;">
+          </div>
+          
+          <div class="control-group">
+            <label class="control-label">Wait Between</label>
+            <span class="info-icon" title="Wait time between each full run loop">ℹ️</span>
+            <div style="display:flex; gap: 4px; align-items:center;">
+              <input type="number" id="repeat-delay-min" value="0" min="0" class="control-input" style="width: 40px; padding: 4px;" title="Minutes"> <span style="font-size:10px; color:#aaa;">m</span>
+              <input type="number" id="repeat-delay-sec" value="0" min="0" class="control-input" style="width: 40px; padding: 4px;" title="Seconds"> <span style="font-size:10px; color:#aaa;">s</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share Button -->
+        <button id="share-button" class="share-button">
+          🚀 Share to Selected Groups
+        </button>
+      </div>
+
+      <!-- Progress Bar -->
+      <div id="progress-container" class="progress-container hidden">
+        <div class="progress-info">
+          <span id="progress-text">Sharing...</span>
+          <span id="progress-count">0/0</span>
+        </div>
+        <div class="progress-bar-wrapper">
+          <div id="progress-bar" class="progress-bar">
+            <div class="progress-bar-shimmer"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <p class="disclaimer">💡 Recommendation: Avoid posting 20+ links to your site within 24 hours</p>
+    </div>
+    <!-- Dangerous Features Removed -->
+    <!-- Settings/Auth Removed -->
+    <!-- Screenshot overlay -->
+    <div id="screenshot-overlay" class="screenshot-overlay hidden">
+      <img id="screenshot-image" src="" alt="Captured screenshot">
+      <div class="screenshot-hint">Click to copy to clipboard</div>
+    </div>
+
+    <!-- Address Book Management View -->
+    <div id="address-book-view" class="hidden">
+
+      <!-- Header -->
+      <div style="display:flex; align-items:center; gap:10px; padding:14px 14px 0 14px;">
+        <button id="back-button" style="
+          flex-shrink:0;
+          background:rgba(30,178,255,0.12);
+          border:1px solid rgba(30,178,255,0.35);
+          color:#1eb2ff;
+          padding:6px 14px;
+          border-radius:20px;
+          font-size:12px;
+          font-weight:700;
+          cursor:pointer;
+          transition:all 0.2s;
+          letter-spacing:0.3px;
+        ">← Back</button>
+        <div style="display:flex; align-items:center; gap:7px;">
+          <span style="font-size:18px;">📄</span>
+          <span style="
+            font-size:17px;
+            font-weight:800;
+            background:linear-gradient(135deg,#1eb2ff 0%,#00d4ff 100%);
+            -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent;
+            background-clip:text;
+            letter-spacing:0.2px;
+          ">Saved Post Templates</span>
+        </div>
+      </div>
+
+      <!-- Subtitle -->
+      <p style="color:rgba(255,255,255,0.45); font-size:11.5px; margin:5px 14px 10px 14px; font-style:italic;">
+        Save and reuse your post content templates
+      </p>
+
+      <!-- Template List -->
+      <div id="template-list" style="
+        max-height:270px;
+        overflow-y:auto;
+        padding:0 14px;
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        scrollbar-width:thin;
+        scrollbar-color:rgba(30,178,255,0.3) transparent;
+      "></div>
+
+      <!-- Edit Form (hidden by default) -->
+      <div id="edit-form" class="hidden" style="padding:0 14px; margin-top:8px;">
+        <div style="
+          background:rgba(30,178,255,0.06);
+          border:1px solid rgba(30,178,255,0.2);
+          border-radius:12px;
+          padding:14px;
+        ">
+          <h3 style="color:#1eb2ff; font-size:13px; font-weight:700; margin:0 0 12px 0;">✏️ Edit Template</h3>
+          <div style="margin-bottom:10px;">
+            <label style="display:block; color:rgba(255,255,255,0.75); font-size:11px; font-weight:600; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Template Name</label>
+            <input type="text" id="edit-name" placeholder="e.g., Product Launch Post" style="
+              width:100%; padding:9px 11px;
+              border:1px solid rgba(30,178,255,0.3);
+              border-radius:9px;
+              background:rgba(0,12,35,0.7);
+              color:#fff;
+              font-size:13px;
+              box-sizing:border-box;
+              outline:none;
+              font-family:inherit;
+              transition:border-color 0.2s;
+            ">
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="display:block; color:rgba(255,255,255,0.75); font-size:11px; font-weight:600; margin-bottom:5px; text-transform:uppercase; letter-spacing:0.5px;">Post Content</label>
+            <textarea id="edit-data" placeholder="Your post content here..." style="
+              width:100%; min-height:75px;
+              padding:9px 11px;
+              border:1px solid rgba(30,178,255,0.3);
+              border-radius:9px;
+              background:rgba(0,12,35,0.7);
+              color:#fff;
+              font-size:13px;
+              box-sizing:border-box;
+              resize:vertical;
+              outline:none;
+              font-family:inherit;
+              line-height:1.5;
+            "></textarea>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button id="save-edit" style="
+              flex:2;
+              background:linear-gradient(135deg,#1eb2ff 0%,#00d4ff 100%);
+              border:none; color:#fff;
+              padding:10px;
+              border-radius:9px;
+              font-size:13px; font-weight:700;
+              cursor:pointer;
+              box-shadow:0 3px 12px rgba(30,178,255,0.35);
+              transition:all 0.2s;
+            ">💾 Save Template</button>
+            <button id="cancel-edit" style="
+              flex:1;
+              background:rgba(255,255,255,0.08);
+              border:1px solid rgba(255,255,255,0.15);
+              color:rgba(255,255,255,0.7);
+              padding:10px;
+              border-radius:9px;
+              font-size:13px; font-weight:600;
+              cursor:pointer;
+              transition:all 0.2s;
+            ">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Button -->
+      <div style="padding:10px 14px 14px 14px;">
+        <button id="add-new" style="
+          width:100%;
+          background:linear-gradient(135deg,#1eb2ff 0%,#00d4ff 100%);
+          border:none;
+          color:#fff;
+          padding:13px 16px;
+          border-radius:12px;
+          font-size:14px;
+          font-weight:700;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+          box-shadow:0 4px 16px rgba(30,178,255,0.4);
+          transition:all 0.25s;
+          letter-spacing:0.3px;
+        ">
+          <span style="font-size:18px; font-weight:300;">+</span>
+          Add New Template
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Address Book Modal -->
+    <div id="address-book-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-button">&times;</span>
+        <h2>Address Book</h2>
+        <div id="modal-address-list"></div>
+        <button id="use-address" class="primary">Use</button>
+      </div>
+    </div>
+
+    <!-- Group Presets Modal (Save) -->
+    <div id="save-preset-modal" class="modal hidden" style="z-index: 10000;">
+      <div class="modal-content preset-modal-content">
+        <span id="close-save-preset-modal" class="close-button">&times;</span>
+
+        <!-- Question View -->
+        <div id="preset-question-view">
+          <h2 class="modal-title">📖 Save as Group Preset?</h2>
+          <p class="modal-subtitle">Would you like to save this group selection for later use?</p>
+
+          <div class="preset-groups-preview">
+            <div class="preview-header">
+              <span class="preview-icon">🎯</span>
+              <span id="preset-groups-count-question">0 groups selected</span>
+            </div>
+            <div id="preset-groups-list-question" class="preset-groups-list"></div>
+          </div>
+
+          <div class="preset-actions">
+            <button id="preset-answer-no" class="btn-secondary">No, thanks</button>
+            <button id="preset-answer-yes" class="btn-primary">✓ Yes, Save It!</button>
+          </div>
+        </div>
+
+        <!-- Save Form View -->
+        <div id="preset-form-view" class="hidden">
+          <h2 class="modal-title">📖 Save Group Preset</h2>
+          <p class="modal-subtitle">Give your preset a name</p>
+
+          <div class="preset-form">
+            <div class="form-section">
+              <label for="preset-name" class="form-label">📝 Preset Name</label>
+              <input type="text" id="preset-name" class="preset-name-input"
+                placeholder="e.g., Daily Marketing Groups, Tech Communities, etc." maxlength="50">
+            </div>
+
+            <div class="preset-groups-preview">
+              <div class="preview-header">
+                <span class="preview-icon">🎯</span>
+                <span id="preset-groups-count">0 groups selected</span>
+              </div>
+              <div id="preset-groups-list" class="preset-groups-list"></div>
+            </div>
+
+            <div class="preset-actions">
+              <button id="cancel-save-preset" class="btn-secondary">Cancel</button>
+              <button id="confirm-save-preset" class="btn-primary">💾 Save Preset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group Presets Manager Modal -->
+    <div id="presets-manager-modal" class="modal hidden" style="z-index: 10000;">
+      <div class="modal-content presets-manager-content">
+        <span id="close-presets-manager" class="close-button">&times;</span>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <h2 class="modal-title" style="margin-bottom:0px;">📖 Group Presets Manager</h2>
+          <button id="open-link-to-preset-btn" style="background:rgba(30,178,255,0.15); border:1px solid rgba(30,178,255,0.4); color:#1eb2ff; padding:6px 12px; border-radius:12px; font-size:12px; font-weight:700; cursor:pointer;" title="Create Preset from Group Links">
+            🔗 Import Links
+          </button>
+        </div>
+        <p class="modal-subtitle" style="margin-top:4px;">Manage and apply your saved group selections</p>
+
+        <div id="presets-list-container" class="presets-list-container">
+          <!-- Presets will be dynamically loaded here -->
+        </div>
+
+        <div class="empty-presets-state hidden">
+          <div class="empty-icon">📚</div>
+          <p class="empty-text">No presets saved yet</p>
+          <p class="empty-hint">Select groups and click "Share to Selected Groups" to create your first preset.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Link to Preset Modal -->
+    <div id="link-to-preset-modal" class="modal hidden" style="z-index: 10010;">
+      <div class="modal-content" style="background: linear-gradient(135deg, #0d2137 0%, #0a1628 100%); width: 85%; max-width: 450px;">
+        <span id="close-link-to-preset" class="close-button">&times;</span>
+        <h2 class="modal-title" style="font-size:20px;">🔗 Create Preset from Links</h2>
+        <p class="modal-subtitle">Paste Facebook group links (one per line) to auto-extract group names.</p>
+
+        <div style="margin-top:15px;">
+          <label style="color:#1eb2ff; font-size:13px; font-weight:600; margin-bottom:6px; display:block;">Paste Links Here</label>
+          <textarea id="preset-links-input" placeholder="https://www.facebook.com/groups/probashisamiamoni
+https://www.facebook.com/groups/482869857320012/" style="width:100%; height:80px; background:rgba(0,12,35,0.6); border:1px solid rgba(30,178,255,0.3); border-radius:8px; color:#fff; padding:10px; font-size:12px; resize:vertical; box-sizing:border-box;"></textarea>
+          <button id="fetch-preset-links-btn" style="width:100%; background:linear-gradient(135deg,#9c27b0 0%,#e91e63 100%); border:none; color:#fff; padding:8px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; margin-top:10px; box-shadow:0 3px 10px rgba(156,39,176,0.3);">
+            ✨ Extract Group Names
+          </button>
+        </div>
+
+        <div id="preset-scraped-names-container" class="hidden" style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.1); padding-top:15px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:6px;">
+            <label style="color:#4ade80; font-size:13px; font-weight:600; display:block;">Extracted Group Names</label>
+            <span id="extraction-summary-text" style="font-size:11px; color:#9ca3af;">0/0 Extracted</span>
+          </div>
+          <div style="max-height: 150px; overflow-y: auto; background: rgba(0,12,35,0.6); border: 1px solid rgba(74,222,128,0.3); border-radius: 8px;">
+            <table style="width:100%; border-collapse: collapse; text-align: left;">
+              <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(74,222,128,0.1);">
+                  <th style="padding: 6px 10px; font-size: 11px; color: #4ade80; font-weight: 600; width: 30%">Link info</th>
+                  <th style="padding: 6px 10px; font-size: 11px; color: #4ade80; font-weight: 600; width: 70%">Editable Name</th>
+                </tr>
+              </thead>
+              <tbody id="extraction-results-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+          
+          <label style="color:#fff; font-size:13px; font-weight:600; margin-top:15px; margin-bottom:6px; display:block;">Save To</label>
+          <select id="link-preset-select" style="width:100%; background:rgba(0,12,35,0.6); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; padding:10px; font-size:14px; box-sizing:border-box; margin-bottom:10px;">
+            <option value="new_preset">➕ Create New Preset</option>
+            <!-- Dynamic presets go here -->
+          </select>
+          <input type="text" id="link-preset-name-input" placeholder="My New Preset Name" style="width:100%; background:rgba(0,12,35,0.6); border:1px solid rgba(255,255,255,0.2); border-radius:8px; color:#fff; padding:10px; font-size:14px; box-sizing:border-box; margin-bottom:15px;">
+          
+          <button id="save-link-preset-btn" style="width:100%; background:linear-gradient(135deg,#1eb2ff 0%,#00d4ff 100%); border:none; color:#fff; padding:10px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer; box-shadow:0 3px 10px rgba(30,178,255,0.3);">
+            💾 Save Preset
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- One Click Templates Create Modal -->
+    <div id="create-one-click-modal" class="modal hidden" style="z-index: 10001;">
+      <div class="modal-content one-click-modal-content">
+        <span id="close-create-one-click" class="close-button">&times;</span>
+        <h2 class="modal-title">⚡ Create 1 Click Share Template</h2>
+        <p class="modal-subtitle">Combine a Group List with a Post Template for instant sharing</p>
+
+        <div class="one-click-form">
+          <div class="form-section">
+            <label for="one-click-template-name" class="form-label">Template Name</label>
+            <input type="text" id="one-click-template-name" class="one-click-input"
+              placeholder="e.g., Daily Marketing Blast, Weekly Updates, etc." maxlength="50">
+          </div>
+
+          <div class="form-section">
+            <label for="one-click-group-preset" class="form-label">📖 Select Group List</label>
+            <select id="one-click-group-preset" class="one-click-select">
+              <option value="">-- Select a Group List --</option>
+            </select>
+          </div>
+
+          <div class="form-section">
+            <label for="one-click-post-template" class="form-label">📝 Select Post Template</label>
+            <select id="one-click-post-template" class="one-click-select">
+              <option value="">-- Select a Post Template --</option>
+            </select>
+          </div>
+
+          <div class="one-click-actions">
+            <button id="cancel-one-click-template" class="btn-secondary">Cancel</button>
+            <button id="save-one-click-template" class="btn-primary">⚡ Create Template</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- One Click Templates Manager Modal -->
+    <div id="one-click-manager-modal" class="modal hidden" style="z-index: 10001;">
+      <div class="modal-content one-click-manager-content">
+        <span id="close-one-click-manager" class="close-button">&times;</span>
+        <div class="modal-header-with-button">
+          <div>
+            <h2 class="modal-title">⚡ 1 Click Share Templates</h2>
+            <p class="modal-subtitle">Manage your quick share templates</p>
+          </div>
+          <button id="create-new-one-click" class="btn-primary create-new-btn">
+            ➕ Create New
+          </button>
+        </div>
+
+        <div id="one-click-templates-list" class="one-click-templates-list">
+          <!-- Templates will be dynamically loaded here -->
+        </div>
+
+        <div class="empty-one-click-state hidden">
+          <div class="empty-icon">⚡</div>
+          <p class="empty-text">No 1 Click Templates yet</p>
+          <p class="empty-hint">Create a template to combine your Group Lists with Post Templates for instant sharing.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Content Modal -->
+    <div id="ai-content-modal" class="modal hidden" style="z-index: 9999;">
+      <div class="modal-content ai-modal-content">
+        <span id="close-ai-modal" class="close-button">&times;</span>
+        <h2 class="modal-title">✨ AI Variation Generator</h2>
+        <p class="modal-subtitle">Create unique versions of your message to avoid spam filters</p>
+
+        <div class="ai-form">
+          <div class="form-section">
+            <div class="form-header">
+              <label for="ai-prompt" class="form-label">💬 Describe Your Message</label>
+              <button id="ai-prompt-settings-btn" class="settings-toggle-btn">
+                <span class="settings-icon">⚙️</span> Advanced
+              </button>
+            </div>
+            <textarea id="ai-prompt" class="ai-prompt-input"
+              placeholder="Example: A friendly invitation to join my new Facebook group about digital marketing tips"></textarea>
+
+            <div id="ai-system-prompt-container" class="advanced-settings hidden">
+              <div class="advanced-header">
+                <span class="advanced-icon">🔧</span>
+                <span class="advanced-title">Advanced Instructions</span>
+              </div>
+              <label for="ai-system-prompt" class="advanced-label">Base Instructions (System Prompt):</label>
+              <textarea id="ai-system-prompt" class="system-prompt-input"></textarea>
+              <div class="advanced-buttons">
+                <button id="ai-save-system-prompt" class="btn-small primary">💾 Save as Default</button>
+                <button id="ai-reset-system-prompt" class="btn-small secondary">🔄 Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label for="ai-variation-count" class="form-label">🔢 Number of Variations</label>
+            <div class="variation-count-control">
+              <input type="number" id="ai-variation-count" value="3" min="1" max="20" class="variation-count-input">
+              <span class="variation-help">More variations = better spam protection</span>
+            </div>
+          </div>
+
+          <button id="ai-generate-btn" class="generate-button">
+            <span class="button-icon">✨</span> Generate Variations
+          </button>
+        </div>
+
+        <div id="ai-results-container" class="ai-results-container">
+          <!-- Results will appear here -->
+        </div>
+
+        <div id="ai-status" class="status hidden"></div>
+
+        <button id="ai-apply-btn" class="apply-button hidden">
+          <span class="button-icon">✅</span> Use Selected Variations
+        </button>
+      </div>
+    </div>
+
+    <div id="activity-log-modal" class="modal hidden" style="z-index: 10020;">
+      <div class="modal-content" style="background: linear-gradient(135deg, #0d2137 0%, #0a1628 100%); width: 95%; max-width: 500px; padding: 15px;">
+        <span id="close-activity-log" class="close-button">&times;</span>
+        <h2 class="modal-title" style="font-size:20px;">📜 Activity Log</h2>
+        <p class="modal-subtitle">Recent sharing activity history</p>
+
+        <div id="log-list-container" style="margin-top: 15px; max-height: 350px; overflow-y: auto; background: rgba(0, 12, 35, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;">
+          <div id="log-entries" style="padding: 10px;">
+            <p style="text-align: center; color: #9ca3af; padding: 20px;">No logs found.</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+          <button id="clear-logs-btn" style="flex: 1; background: rgba(224, 36, 36, 0.15); border: 1px solid rgba(224, 36, 36, 0.3); color: #f87171; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">🗑️ Clear Logs</button>
+          <button id="refresh-logs-btn" style="flex: 1; background: rgba(30, 178, 255, 0.15); border: 1px solid rgba(30, 178, 255, 0.3); color: #1eb2ff; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600;">🔄 Refresh</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="expired_overlay.js"></script>
+    <script src="ai_content.js"></script>
+    <script src="address-book.js"></script>
+    <script src="one_click_templates.js"></script>
+    <!-- NEW: Popup module split files (must load BEFORE popup.js) -->
+    <script src="js/popup/popup_groups_ui.js"></script>
+    <script src="js/popup/popup_presets.js"></script>
+    <script src="js/popup/popup_settings.js"></script>
+    <!-- Core popup (DOMContentLoaded entry — loads LAST) -->
+    <script src="popup.js"></script>
+  </div>
+</body>
+
+</html>

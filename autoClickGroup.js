@@ -101,8 +101,21 @@ function scanForGroupOption() {
         globalAttempts++;
         console.log(`🧪 [RETRY-LAYER] Scanning Cycle #${globalAttempts}...`);
         
-        if (globalAttempts > 20) {
-            console.warn("⚠️ [RETRY-FAIL] Exhausted 20 attempts. Notifying panel to retry...");
+        if (globalAttempts === 4 || globalAttempts === 8 || globalAttempts === 12) {
+            console.log(`🔄 [RETRY-LAYER] Menu not found after scans. Re-clicking Share button! (Attempt ${globalAttempts/4}/3)`);
+            if (typeof findPrimaryShareButton === 'function' && typeof safeClick === 'function') {
+                const btn = findPrimaryShareButton();
+                if (btn) {
+                    safeClick(btn);
+                    console.log("✅ [RETRY-LAYER] Native Share button re-clicked successfully. Waiting for menu...");
+                } else {
+                    console.log("⚠️ [RETRY-LAYER] Share button not found on screen for native re-click.");
+                }
+            }
+        }
+
+        if (globalAttempts > 15) {
+            console.log("❌ [RETRY-FAIL] Exhausted 3 native Share button re-clicks. Notifying panel to full-reload/retry...");
             clearInterval(scanInterval);
             if (overlay) overlay.style.display = 'none';
             chrome.runtime.sendMessage({ type: 'batch_retry_requested', reason: 'share_menu_not_found' });

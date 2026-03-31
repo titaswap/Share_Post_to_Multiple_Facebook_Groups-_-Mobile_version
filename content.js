@@ -246,16 +246,68 @@ function safeClick(el) {
         el.style.outline = '5px solid #ff0000';
         el.style.zIndex = '99999';
         el.scrollIntoView({ block: "center", behavior: "smooth" });
+        
         const rect = el.getBoundingClientRect();
-        const x = rect.left + rect.width / 2;
-        const y = rect.top + rect.height / 2;
-        const pointTarget = document.elementFromPoint(x, y) || el;
-        ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'].forEach(type =>
-            pointTarget.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window }))
-        );
+        
+        // Strategy 1: Exact Center
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Strategy 2: Bottom Center
+        // FB mobile buttons are slightly padded; 80% is safer than 85% to avoid jumping off the element
+        const bottomX = rect.left + rect.width / 2;
+        const bottomY = rect.top + rect.height * 0.80; 
+        
+        let targetX = bottomX;
+        let targetY = bottomY;
+        let pointTarget = document.elementFromPoint(targetX, targetY);
+        
+        const isSeeMore = (target) => {
+            if (!target || !target.innerText) return false;
+            const txt = target.innerText.toLowerCase();
+            return txt.includes('see more') || txt.includes('আরও');
+        };
+
+        // SAFEGUARD: If bottom hit "See more", missed completely, or missed the button container
+        if (!pointTarget || !el.contains(pointTarget) || isSeeMore(pointTarget)) {
+             console.log("⚠️ [CT-CLICK] Bottom hit 'See more' or missed! Shifting click strategy.");
+             targetX = centerX;
+             targetY = centerY;
+             pointTarget = document.elementFromPoint(targetX, targetY) || el;
+             
+             // If center ALSO hits 'See more', force the click directly onto the SVG/icon or the button container itself
+             if (isSeeMore(pointTarget)) {
+                 console.log("⚠️ [CT-CLICK] Center ALSO hit 'See more'! Forcing click directly onto Share element node.");
+                 pointTarget = el.querySelector('svg, i, img') || el;
+                 const svgRect = pointTarget.getBoundingClientRect();
+                 targetX = svgRect.left + svgRect.width / 2;
+                 targetY = svgRect.top + svgRect.height / 2;
+             }
+        }
+
+        const eventsToFire = ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click'];
+        
+        // Fire simulated events exactly at the validated targetX/targetY
+        eventsToFire.forEach(type => {
+            pointTarget.dispatchEvent(new MouseEvent(type, { 
+                bubbles: true, 
+                cancelable: true, 
+                view: window,
+                clientX: targetX,
+                clientY: targetY
+            }));
+        });
+        
         pointTarget.dispatchEvent(new Event('touchstart', { bubbles: true }));
         pointTarget.dispatchEvent(new Event('touchend', { bubbles: true }));
+
+        // Native click on the Original Element just to be 100% sure!
+        if (pointTarget !== el && typeof el.click === 'function') {
+            el.click();
+        }
+
         console.log("✅ [CT-CLICK] Events dispatched successfully.");
+        
         setTimeout(() => {
             el.style.boxShadow = '';
             el.style.outline = '';
